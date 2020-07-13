@@ -6,7 +6,7 @@ namespace Checksum_Calculator
 {
     public sealed class Crc32 : HashAlgorithm
     {
-        public const uint DefaultPolynomial = 0x04c11db7u;
+        public const uint DefaultPolynomial = 0xedb88320u;
         public const uint DefaultSeed = 0xffffffffu;
 
         static uint[] defaultTable;
@@ -45,7 +45,13 @@ namespace Checksum_Calculator
 
         protected override byte[] HashFinal()
         {
-            return BitConverter.GetBytes(hash);
+            var hashBuffer = BitConverter.GetBytes(~hash);
+
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(hashBuffer);
+            
+            HashValue = hashBuffer;
+            return hashBuffer;
         }
 
         public static uint Compute(byte[] buffer)
