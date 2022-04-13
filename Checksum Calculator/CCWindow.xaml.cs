@@ -1,57 +1,63 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace Checksum_Calculator
+namespace ChecksumCalculator
 {
-    public partial class MainWindow : Window
+    public partial class CCWindow : Window
     {
-        private const int HashTypes = 5;
-        private static int ElementsCompleted;
+        private int ElementsCompleted;
+        public string Filename { get; set; }
 
-        public MainWindow()
+        public CCWindow()
         {
             InitializeComponent();
+            Filename = "Select file...";
         }
 
         #region Methods
 
-        private async void InitializeHashComputation(string Filename)
+        private async void InitializeHashComputation()
         {
             Init();
-
-            using (var inputStream = File.OpenRead(Filename))
+            List<Task> RunnableTasks = new List<Task>
             {
-                await Task.Factory.StartNew(() => { GetComputedHash(inputStream, HashType.CRC32, Crc32Box); });
-                await Task.Factory.StartNew(() => { GetComputedHash(inputStream, HashType.MD5, Md5Box); });
-                await Task.Factory.StartNew(() => { GetComputedHash(inputStream, HashType.SHA1, Sha1Box); });
-                await Task.Factory.StartNew(() => { GetComputedHash(inputStream, HashType.SHA256, Sha256Box); });
-                await Task.Factory.StartNew(() => { GetComputedHash(inputStream, HashType.SHA512, Sha512Box); });
-            }
+                GetComputedHash(HashType.Crc32, Crc32Box, Crc32Progress),
+                GetComputedHash(HashType.Md5, Md5Box, Md5Progress),
+                GetComputedHash(HashType.Sha1, Sha1Box, Sha1Progress),
+                GetComputedHash(HashType.Sha256, Sha256Box, Sha256Progress),
+                GetComputedHash(HashType.Sha512, Sha512Box, Sha512Progress)
+            };
+
+            await Task.WhenAll(RunnableTasks.ToArray());
         }
 
-        private void GetComputedHash(FileStream fstream, HashType type, TextBox dispatchBox)
+        private async Task GetComputedHash(HashType type, TextBox resultBox, ProgressBar resultBar)
         {
-            Hasher hasher = new Hasher(fstream);
-            string hash = hasher.GetChecksumByType(type);
-
-            this.Dispatcher.Invoke((Action)(() =>
+            await Task.Run(() =>
             {
-                dispatchBox.Text = hash;
-            }));
+                Hasher hasher = new Hasher(Filename);
+                string hash = hasher.ComputeHash(type);
+
+                this.Dispatcher.Invoke(() =>
+                {
+                    resultBox.Text = hash;
+                    resultBar.Visibility = Visibility.Hidden;
+
+                    ComputationFinished();
+                });
+            });
         }
 
         private void ComputationFinished()
         {
             ElementsCompleted++;
 
-            if (ElementsCompleted == HashTypes)
-            {
+            if (ElementsCompleted == Enum.GetNames(typeof(HashType)).Length)
                 InputBrowse.IsEnabled = true;
-            }
         }
 
         private void Init()
@@ -74,15 +80,11 @@ namespace Checksum_Calculator
             Nullable<bool> result = dlg.ShowDialog();
             if (result == true)
             {
-                InputFile.Foreground = Brushes.Black;
-                InputFile.Text = dlg.FileName;
-            }
+                InputFile.Text = Filename = dlg.FileName;
+                InitializeHashComputation();
+            } 
             else
-            {
                 return;
-            }
-
-            InitializeHashComputation(InputFile.Text);
         }
 
         private void PasteButton_Click(object sender, RoutedEventArgs e)
@@ -158,36 +160,6 @@ namespace Checksum_Calculator
 
             InfoLabel.Foreground = Brushes.Red;
             InfoLabel.Content = "Does not match!";
-        }
-
-        private void Crc32Box_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ComputationFinished();
-            Crc32Progress.Visibility = Visibility.Hidden;
-        }
-
-        private void Md5Box_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            ComputationFinished();
-            Md5Progress.Visibility = Visibility.Hidden;
-        }
-
-        private void Sha1Box_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            ComputationFinished();
-            Sha1Progress.Visibility = Visibility.Hidden;
-        }
-
-        private void Sha256Box_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            ComputationFinished();
-            Sha256Progress.Visibility = Visibility.Hidden;
-        }
-
-        private void Sha512Box_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ComputationFinished();
-            Sha512Progress.Visibility = Visibility.Hidden;
         }
 
         #endregion

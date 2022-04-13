@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Checksum_Calculator.Properties
+namespace ChecksumCalculator.Properties
 {
 
 

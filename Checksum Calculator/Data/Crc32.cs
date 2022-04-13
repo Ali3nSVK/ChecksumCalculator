@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 
-namespace Checksum_Calculator
+namespace ChecksumCalculator
 {
     public sealed class Crc32 : HashAlgorithm
     {

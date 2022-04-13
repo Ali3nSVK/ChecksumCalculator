@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Checksum Calculator", "Checksum Calculator\Checksum Calculator.csproj", "{AF0D8D50-F357-4637-B9FC-FEF935AE864B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChecksumCalculator", "Checksum Calculator\ChecksumCalculator.csproj", "{AF0D8D50-F357-4637-B9FC-FEF935AE864B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +18,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2AEE7C5D-3715-44B4-B0D4-1BF92314DCF0}
 	EndGlobalSection
 EndGlobal

@@ -1,52 +1,54 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Security.Cryptography;
 
-namespace Checksum_Calculator
+namespace ChecksumCalculator
 {
+    public enum HashType
+    {
+        Crc32,
+        Md5,
+        Sha1,
+        Sha256,
+        Sha512
+    }
+
     public class Hasher
     {
-        #region Properties
+        private readonly string filename;
 
-        private readonly FileStream InputStream;
-
-        public Hasher(FileStream inputStream)
+        public Hasher(string fname)
         {
-            InputStream = inputStream;
+            filename = fname;
         }
 
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// Returns checksum based on hash algorithm specified as argument.
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public string GetChecksumByType(HashType type)
+        private HashAlgorithm GetHashAlgorithm(HashType type)
         {
-            byte[] computedHash = ComputeDynamicHash(type, InputStream);
-            return BitConverter.ToString(computedHash).Replace("-", "‌​").ToLower();
+            switch(type)
+            {
+                case HashType.Crc32:
+                    return new Crc32();
+                case HashType.Md5:
+                    return new MD5CryptoServiceProvider();
+                case HashType.Sha1:
+                    return new SHA1CryptoServiceProvider();
+                case HashType.Sha256:
+                    return new SHA256CryptoServiceProvider();
+                case HashType.Sha512:
+                    return new SHA512CryptoServiceProvider();
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
-        /// <summary>
-        /// Instantiates proper cryptography class and computes hash based on input stream.
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="inputStream"></param>
-        /// <returns></returns>
-        private byte[] ComputeDynamicHash(HashType type, FileStream inputStream)
+        public string ComputeHash(HashType type)
         {
-            Type hashType = Type.GetType(type.Reference, true);
-            var cryptoInstance = Activator.CreateInstance(hashType) as HashAlgorithm;
-
-            object[] MethodArgs = new object[] { inputStream };
-            MethodInfo method = hashType.GetMethod("ComputeHash", new[] { typeof(Stream) });
-            return (byte[])method.Invoke(cryptoInstance, MethodArgs);
+            using (var stream = File.OpenRead(filename))
+            {
+                return BitConverter.ToString(GetHashAlgorithm(type).ComputeHash(stream)).
+                    Replace("-", "‌​").
+                    ToLower();
+            }
         }
-        
-        #endregion
     }
 }

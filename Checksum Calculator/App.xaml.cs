@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Checksum_Calculator
+namespace ChecksumCalculator
 {
     /// <summary>
     /// Interaction logic for App.xaml
