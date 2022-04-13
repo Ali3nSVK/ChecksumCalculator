@@ -15,27 +15,15 @@ namespace ChecksumCalculator
         readonly uint[] table;
         uint hash;
 
-        public override int HashSize
-        {
-            get
-            {
-                return 32;
-            }
-        }
+        public override int HashSize => 32;
+        public override void Initialize() => hash = seed;
 
-        public Crc32() : this(DefaultPolynomial, DefaultSeed)
-        {
-        }
+        public Crc32() : this(DefaultPolynomial, DefaultSeed) { }
 
         public Crc32(uint polynomial, uint seed)
         {
             table = InitializeTable(polynomial);
             this.seed = hash = seed;
-        }
-
-        public override void Initialize()
-        {
-            hash = seed;
         }
 
         protected override void HashCore(byte[] array, int ibStart, int cbSize)
