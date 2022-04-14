@@ -1,18 +1,10 @@
-﻿using System;
+﻿using ChecksumCalculator.Data;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 
 namespace ChecksumCalculator
 {
-    public enum HashType
-    {
-        Crc32,
-        Md5,
-        Sha1,
-        Sha256,
-        Sha512
-    }
-
     public class Hasher
     {
         private readonly string filename;
@@ -26,15 +18,17 @@ namespace ChecksumCalculator
         {
             switch(type)
             {
-                case HashType.Crc32:
+                case HashType.CRC32:
                     return new Crc32();
-                case HashType.Md5:
+                case HashType.MD5:
                     return new MD5CryptoServiceProvider();
-                case HashType.Sha1:
+                case HashType.SHA1:
                     return new SHA1CryptoServiceProvider();
-                case HashType.Sha256:
+                case HashType.SHA256:
                     return new SHA256CryptoServiceProvider();
-                case HashType.Sha512:
+                case HashType.SHA384:
+                    return new SHA384CryptoServiceProvider();
+                case HashType.SHA512:
                     return new SHA512CryptoServiceProvider();
                 default:
                     throw new NotSupportedException();

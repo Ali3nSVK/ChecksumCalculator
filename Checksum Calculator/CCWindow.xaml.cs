@@ -1,5 +1,7 @@
-﻿using System;
+﻿using ChecksumCalculator.Data;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,11 +12,14 @@ namespace ChecksumCalculator
     public partial class CCWindow : Window
     {
         private int ElementsCompleted;
+        private Dictionary<HashType, HashUiElement> Elements;
         public string Filename { get; set; }
 
         public CCWindow()
         {
             InitializeComponent();
+            InitializeUI();
+
             Filename = "Select file...";
         }
 
@@ -22,30 +27,22 @@ namespace ChecksumCalculator
 
         private async void InitializeHashComputation()
         {
-            Init();
-            List<Task> RunnableTasks = new List<Task>
-            {
-                GetComputedHash(HashType.Crc32, Crc32Box, Crc32Progress),
-                GetComputedHash(HashType.Md5, Md5Box, Md5Progress),
-                GetComputedHash(HashType.Sha1, Sha1Box, Sha1Progress),
-                GetComputedHash(HashType.Sha256, Sha256Box, Sha256Progress),
-                GetComputedHash(HashType.Sha512, Sha512Box, Sha512Progress)
-            };
+            CompInit();
+            var RunnableTasks = Elements.ToList().Select(e => GetComputedHash(e.Value));
 
             await Task.WhenAll(RunnableTasks.ToArray());
         }
 
-        private async Task GetComputedHash(HashType type, TextBox resultBox, ProgressBar resultBar)
+        private async Task GetComputedHash(HashUiElement element)
         {
             await Task.Run(() =>
             {
-                Hasher hasher = new Hasher(Filename);
-                string hash = hasher.ComputeHash(type);
+                string hash = new Hasher(Filename).ComputeHash(element.type);
 
                 this.Dispatcher.Invoke(() =>
                 {
-                    resultBox.Text = hash;
-                    resultBar.Visibility = Visibility.Hidden;
+                    element.text.Text = hash;
+                    element.prog.Visibility = Visibility.Hidden;
 
                     ComputationFinished();
                 });
@@ -54,20 +51,8 @@ namespace ChecksumCalculator
 
         private void ComputationFinished()
         {
-            ElementsCompleted++;
-
-            if (ElementsCompleted == Enum.GetNames(typeof(HashType)).Length)
+            if (++ElementsCompleted == Enum.GetNames(typeof(HashType)).Length)
                 InputBrowse.IsEnabled = true;
-        }
-
-        private void Init()
-        {
-            ElementsCompleted = 0;
-
-            InputBrowse.IsEnabled = false;
-
-            Crc32Box.Text = Md5Box.Text = Sha1Box.Text = Sha256Box.Text = Sha512Box.Text = String.Empty;
-            Crc32Progress.Visibility = Md5Progress.Visibility = Sha1Progress.Visibility = Sha256Progress.Visibility = Sha512Progress.Visibility = Visibility.Visible;
         }
 
         #endregion
@@ -87,79 +72,102 @@ namespace ChecksumCalculator
                 return;
         }
 
+        private void HashButton_Click(HashUiElement elem)
+        {
+            Clipboard.SetText(elem.text.Text.Trim());
+        }
+
         private void PasteButton_Click(object sender, RoutedEventArgs e)
         {
             HashBox.Text = Clipboard.GetText().Trim().ToLower();
         }
 
-        private void Crc32Button_Click(object sender, RoutedEventArgs e)
-        {
-            Clipboard.SetText(Crc32Box.Text.Trim());
-        }
-
-        private void Md5Button_Click(object sender, RoutedEventArgs e)
-        {
-            Clipboard.SetText(Md5Box.Text.Trim());
-        }
-
-        private void Sha1Button_Click(object sender, RoutedEventArgs e)
-        {
-            Clipboard.SetText(Sha1Box.Text.Trim());
-        }
-
-        private void Sha256Button_Click(object sender, RoutedEventArgs e)
-        {
-            Clipboard.SetText(Sha256Box.Text.Trim());
-        }
-
-        private void Sha512Button_Click(object sender, RoutedEventArgs e)
-        {
-            Clipboard.SetText(Sha512Box.Text.Trim());
-        }
-
         private void VerifyButton_Click(object sender, RoutedEventArgs e)
         {
-            if (HashBox.Text == String.Empty)
+            if (string.IsNullOrWhiteSpace(HashBox.Text))
             {
                 InfoLabel.Foreground = Brushes.Red;
                 InfoLabel.Content = "Paste your hash first!";
                 return;
             }
 
-            InfoLabel.Foreground = Brushes.Green;
-
-            if (HashBox.Text.Trim() == Crc32Box.Text.Trim())
+            var match = Elements.Values.FirstOrDefault(x => x.text.Text == HashBox.Text.Trim());
+            if (match != null)
             {
-                InfoLabel.Content = "Matches with CRC32!";
-                return;
+                InfoLabel.Foreground = Brushes.Green;
+                InfoLabel.Content = string.Format("Matches with {0}!", match.type.ToString());
             }
-
-            if (HashBox.Text.Trim() == Md5Box.Text.Trim())
+            else
             {
-                InfoLabel.Content = "Matches with MD5!";
-                return;
+                InfoLabel.Foreground = Brushes.Red;
+                InfoLabel.Content = "Does not match!";
             }
+        }
 
-            if (HashBox.Text.Trim() == Sha1Box.Text.Trim())
+        #endregion
+
+        #region Init
+
+        private void CompInit()
+        {
+            ElementsCompleted = 0;
+            InputBrowse.IsEnabled = false;
+
+            Elements.ToList().ForEach(x =>
             {
-                InfoLabel.Content = "Matches with SHA1!";
-                return;
-            }
+                x.Value.text.Text = string.Empty;
+                x.Value.prog.Visibility = Visibility.Visible;
+            });
+        }
 
-            if (HashBox.Text.Trim() == Sha256Box.Text.Trim())
+        private void InitializeUI()
+        {
+            Elements = new Dictionary<HashType, HashUiElement>();
+
+            int gridRow = 0;
+            foreach (var hashType in Enum.GetValues(typeof(HashType)).Cast<HashType>())
             {
-                InfoLabel.Content = "Matches with SHA256!";
-                return;
-            }
+                Checksums.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-            if (HashBox.Text.Trim() == Sha512Box.Text.Trim())
-            {
-                InfoLabel.Content = "Matches with SHA512!";
-                return;
-            }
+                HashUiElement element = new HashUiElement
+                {
+                    type = hashType,
+                    label = new Label
+                    {
+                        Content = hashType.ToString() + ":",
+                        Foreground = Brushes.DarkBlue,
+                        HorizontalAlignment = HorizontalAlignment.Right
+                    },
+                    text = new TextBox
+                    {
+                        TextWrapping = TextWrapping.NoWrap,
+                        IsReadOnly = true,
+                        Margin = new Thickness(0, 2, 2, 0)
+                    },
+                    prog = new ProgressBar
+                    {
+                        Visibility = Visibility.Hidden,
+                        IsIndeterminate = true,
+                        Margin = new Thickness(0, 2, 2, 0)
+                    },
+                    button = new Button
+                    {
+                        Content = "Copy " + hashType.ToString(),
+                        Margin = new Thickness(0, 2, 2, 0),
+                        Width = 100
+                    }
+                };
+                element.button.Click += (sender, e) => HashButton_Click(element);
 
-            InfoLabel.Foreground = Brushes.Red;
-            InfoLabel.Content = "Does not match!";
+                element.SetColumns();
+                element.SetRow(gridRow++);
+
+                Elements[hashType] = element;
+                Checksums.Children.Add(element.label);
+                Checksums.Children.Add(element.text);
+                Checksums.Children.Add(element.prog);
+                Checksums.Children.Add(element.button);
+            }
         }
 
         #endregion

@@ -4,43 +4,45 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Checksum Calculator" Height="400" Width="650" Background="LightBlue"
-        ResizeMode="CanMinimize">
-    <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
-        <GroupBox Header="Generate Hash" HorizontalAlignment="Center" Height="353" Margin="5,5,5,5" VerticalAlignment="Center" Width="624" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="Blue">
-            <Grid HorizontalAlignment="Left" Height="335" Margin="0,0,0,0" VerticalAlignment="Top" Width="614">
+        Title="Checksum Calculator"
+        Width="650" SizeToContent="Height" ResizeMode="CanMinimize">
+    
+    <Grid Background="LightBlue">
+        <GroupBox Header="Generate Hash" Margin="2,2,2,2" Foreground="DarkBlue" BorderThickness="0.5">
+            <Grid Margin="0,5,0,5">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="6*"/>
-                    <ColumnDefinition Width="157*"/>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Label x:Name="InputFileLabel" Content="File:" HorizontalAlignment="Left" Margin="8,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.653,3.381" Foreground="DarkBlue" Grid.Column="1"/>
-                <TextBox x:Name="InputFile" HorizontalAlignment="Left" Height="23" Margin="44,12,0,0" TextWrapping="NoWrap" Text="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Filename, Mode=TwoWay}" VerticalAlignment="Top" Width="441" Foreground="Gray" Grid.Column="1" IsReadOnly="True"/>
-                <Button x:Name="InputBrowse" Content="Browse" HorizontalAlignment="Left" Margin="490,12,0,0" VerticalAlignment="Top" Width="91" Click="InputBrowse_Click" Grid.Column="1" RenderTransformOrigin="0.947,0.617"/>
-                <Label x:Name="Md5Label" Content="MD5:" HorizontalAlignment="Left" Margin="1,72,0,0" VerticalAlignment="Top" Foreground="DarkBlue" Grid.Column="1"/>
-                <TextBox x:Name="Md5Box" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="44,74,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" Width="441" IsReadOnly="True"/>
-                <Button x:Name="Md5Button" Content="Copy MD5" Grid.Column="1" HorizontalAlignment="Left" Margin="490,74,0,0" VerticalAlignment="Top" Width="91" Click="Md5Button_Click"/>
-                <Label x:Name="Sha1Label" Content="SHA-1:" HorizontalAlignment="Left" Margin="15,103,0,0" VerticalAlignment="Top" Foreground="DarkBlue" RenderTransformOrigin="-0.213,-0.038" Grid.ColumnSpan="2"/>
-                <TextBox x:Name="Sha1Box" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="44,105,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" Width="441" IsReadOnly="True"/>
-                <Button x:Name="Sha1Button" Content="Copy SHA-1" Grid.Column="1" HorizontalAlignment="Left" Margin="490,105,0,0" VerticalAlignment="Top" Width="91" Click="Sha1Button_Click"/>
-                <Label x:Name="Sha256Label" Content="SHA-256:" HorizontalAlignment="Left" Margin="3,134,0,0" VerticalAlignment="Top" Foreground="DarkBlue" Grid.ColumnSpan="2"/>
-                <TextBox x:Name="Sha256Box" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="44,136,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" Width="441" IsReadOnly="True"/>
-                <Button x:Name="Sha256Button" Content="Copy SHA-256" Grid.Column="1" HorizontalAlignment="Left" Margin="490,136,0,0" VerticalAlignment="Top" Width="91" Click="Sha256Button_Click"/>
-                <Label x:Name="HashLabel" Content="Hash:" HorizontalAlignment="Left" Margin="0,250,0,0" VerticalAlignment="Top" Foreground="DarkBlue" Grid.Column="1"/>
-                <TextBox x:Name="HashBox" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="44,253,0,0" TextWrapping="NoWrap" Text="" VerticalAlignment="Top" Width="441" IsReadOnly="True"/>
-                <Button x:Name="PasteButton" Content="Paste" Grid.Column="1" HorizontalAlignment="Left" Margin="490,253,0,0" VerticalAlignment="Top" Width="91" Click="PasteButton_Click"/>
-                <Button x:Name="VerifyButton" Content="Verify" Grid.Column="1" HorizontalAlignment="Left" Margin="490,282,0,0" VerticalAlignment="Top" Width="91" Click="VerifyButton_Click"/>
-                <Label x:Name="InfoLabel" Content="" Grid.Column="1" HorizontalAlignment="Left" Margin="44,224,0,0" VerticalAlignment="Top" Width="441" Foreground="Green"/>
-                <Button x:Name="Crc32Button" Content="Copy CRC32" Grid.Column="1" HorizontalAlignment="Left" Margin="490,43,0,0" VerticalAlignment="Top" Width="91" Click="Crc32Button_Click"/>
-                <TextBox x:Name="Crc32Box" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="44,43,0,0" TextWrapping="NoWrap" Text="" IsReadOnly="True" VerticalAlignment="Top" Width="441"/>
-                <Label Content="CRC32:" HorizontalAlignment="Left" Margin="15,41,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Foreground="DarkBlue"/>
-                <Button x:Name="Sha512Button" Content="Copy SHA-512" Grid.Column="1" HorizontalAlignment="Left" Margin="490,167,0,0" VerticalAlignment="Top" Width="91" Click="Sha512Button_Click"/>
-                <TextBox x:Name="Sha512Box" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="44,167,0,0" TextWrapping="NoWrap" Text="" IsReadOnly="True" VerticalAlignment="Top" Width="441"/>
-                <Label x:Name="Sha512Label" Content="SHA-512:" HorizontalAlignment="Left" Margin="3,165,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Foreground="DarkBlue"/>
-                <ProgressBar x:Name="Crc32Progress" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="44,43,0,0" VerticalAlignment="Top" Width="441" IsIndeterminate="True" Visibility="Hidden"/>
-                <ProgressBar x:Name="Md5Progress" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="44,74,0,0" VerticalAlignment="Top" Width="441" IsIndeterminate="True" Visibility="Hidden"/>
-                <ProgressBar x:Name="Sha1Progress" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="44,105,0,0" VerticalAlignment="Top" Width="441" IsIndeterminate="True" Visibility="Hidden"/>
-                <ProgressBar x:Name="Sha256Progress" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="44,136,0,0" VerticalAlignment="Top" Width="441" IsIndeterminate="True" Visibility="Hidden"/>
-                <ProgressBar x:Name="Sha512Progress" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="44,167,0,0" VerticalAlignment="Top" Width="441" IsIndeterminate="True" Visibility="Hidden"/>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                
+                <Label Content="File:" Foreground="DarkBlue" Grid.Column="0" Grid.Row="0"/>
+                <TextBox x:Name="InputFile" TextWrapping="NoWrap" Margin="0,0,2,0" Text="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Filename, Mode=TwoWay}" Foreground="Gray" IsReadOnly="True" Grid.Column="1" Grid.Row="0"/>
+                <Button x:Name="InputBrowse" Content="Browse" Width="100" Click="InputBrowse_Click" Grid.Column="2" Grid.Row="0"/>
+
+                <GroupBox Header="Checksums" Margin="2,2,2,2" Foreground="DarkBlue" BorderThickness="0.5" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
+                    <Grid x:Name="Checksums" Margin="0,5,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </GroupBox>
+                
+                <Label Content="Hash:" Foreground="DarkBlue" Grid.Column="0" Grid.Row="2"/>
+                <TextBox x:Name="HashBox" TextWrapping="NoWrap" Margin="0,0,2,0" IsReadOnly="True" Grid.Column="1" Grid.Row="2"/>
+                <Button x:Name="PasteButton" Content="Paste" Click="PasteButton_Click" Grid.Column="2" Grid.Row="2"/>
+
+                <Button x:Name="VerifyButton" Content="Verify" Margin="0,5,0,0" Grid.Column="2" Grid.Row="3" Click="VerifyButton_Click"/>
+                <Label x:Name="InfoLabel" Foreground="Green" Grid.Column="1" Grid.Row="3"/>
             </Grid>
         </GroupBox>
     </Grid>
